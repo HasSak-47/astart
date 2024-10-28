@@ -21,7 +21,7 @@ pub trait World<N: NodeIdentifier>{
 }
 
 pub trait NodeIdentifier where
-    Self: Sized + Clone + Copy
+    Self: Sized + Clone
 {
     fn heuristic(&self) -> f64;
 }
@@ -39,9 +39,12 @@ struct Node<N: NodeIdentifier + Debug + Clone>{
 }
 
 impl<N: NodeIdentifier + Debug> Node<N> {
-    fn new(ident: N) -> Self{ Self{
-        ident, score: ident.heuristic(), parent: None,
-    }}
+    fn new(ident: N) -> Self{
+        let score = ident.heuristic();
+        Self{
+            ident, score, parent: None,
+        }
+    }
 }
 
 
@@ -61,12 +64,12 @@ where
         let mut candidates = vec![Node::new(start)];
         loop{
             let last = candidates.pop().unwrap();
-            if self.world.is_end(last.ident){
+            if self.world.is_end(last.ident.clone()){
                 return Some(Box::new(last));
             }
 
             let mut ns : Vec<_> = self.world
-                .get_neightbors(last.ident)
+                .get_neightbors(last.ident.clone())
                 .into_iter()
                 .map(|n|{
                     let mut n = Node::new(n);
