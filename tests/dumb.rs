@@ -15,14 +15,7 @@ impl TestNode{
     }
 }
 
-impl NodeIdentifier for TestNode {
-    fn heuristic(&self) -> f64 {
-        let dx = (self.x - TARGET.x) as f64;
-        let dy = (self.y - TARGET.y) as f64;
-
-        return (dx * dx + dy * dy).sqrt();
-    }
-}
+impl NodeIdentifier for TestNode {}
 
 
 #[derive(Debug, Default)]
@@ -37,6 +30,13 @@ struct WorldGrid{
 }
 
 impl World<TestNode> for WorldGrid{
+    fn heuristic(&self, n: TestNode) -> f64 {
+        let dx = (n.x - TARGET.x) as f64;
+        let dy = (n.y - TARGET.y) as f64;
+
+        return (dx * dx + dy * dy).sqrt();
+    }
+
     fn is_end(&self, n: TestNode) -> bool {
         n == TARGET
     }
@@ -45,7 +45,7 @@ impl World<TestNode> for WorldGrid{
         return TestNode { x: 0, y: 0 };
     }
 
-    fn get_neightbors(&mut self, n: TestNode) -> Vec<TestNode> {
+    fn get_neightbors(&mut self, n: TestNode) -> Vec<Neightbor<TestNode>> {
         let mut next = vec![
             TestNode::new(n.x + 1, n.y),
             TestNode::new(n.x - 1, n.y),
@@ -60,16 +60,14 @@ impl World<TestNode> for WorldGrid{
         for n in next{
             for d in &self.data{
                 if n != d.ident{
+                    let mut n = Neightbor::new(n);
+                    n.distance = 1.;
                     send.push(n);
                 }
             }
         }
 
         return send;
-    }
-
-    fn is_end_mut(&mut self, n: TestNode) -> bool {
-        n == TARGET
     }
 }
 
@@ -81,7 +79,7 @@ impl WorldGrid{
 
 #[test]
 fn test() -> Result<()>{
-    let mut world = WorldGrid::new();
+    let world = WorldGrid::new();
     let mut a = AStart::new(world);
     let path = a.start();
     for p in path{
