@@ -8,7 +8,7 @@ CXX := g++
 CXXFLAGS := -g -Iinclude -export-dynamic -Wall -Wextra -std=c++17
 
 build: $(OBJS)
-	g++ $(CXXFLAGS) -o $(OUT) $(OBJS) $(LDFLAGS)
+	g++ $(CXXFLAGS) -o $(OUT) $(OBJS)  $(LDFLAGS) target/release/liba_start.so
 
 run : build
 	@./$(OUT)
