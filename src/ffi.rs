@@ -6,27 +6,28 @@ use crate::{AStart, NodeIdentifier, World};
 #[repr(C)]
 pub struct FFI{
     obj           : *mut c_void,
-    start         : extern "C" fn (*mut c_void) -> usize,
-    get_neightbors: extern "C" fn (*mut c_void, *mut usize, *mut f64) -> bool,
-    heuristic     : extern "C" fn (*mut c_void, usize) -> f64,
-    is_end        : extern "C" fn (*mut c_void, usize) -> bool,
+    start         : unsafe extern "C" fn (*mut c_void) -> usize,
+    get_neightbors: unsafe extern "C" fn (*mut c_void, usize, *mut f64) -> bool,
+    heuristic     : unsafe extern "C" fn (*mut c_void, usize) -> f64,
+    is_end        : unsafe extern "C" fn (*mut c_void, usize) -> bool,
+    reset         : unsafe extern "C" fn (*mut c_void),
 }
 
 impl NodeIdentifier for usize { }
 
-impl FFI{
-    pub unsafe extern "C" fn new(
-        obj: *mut c_void,
-        start         : extern "C" fn (*mut c_void) -> usize,
-        get_neightbors: extern "C" fn (*mut c_void, *mut usize, *mut f64) -> bool,
-        heuristic     : extern "C" fn (*mut c_void, usize) -> f64,
-        is_end        : extern "C" fn (*mut c_void, usize) -> bool,
-    ) -> Self{ 
-        FFI {
-            obj,
-            start, get_neightbors, heuristic,
-            is_end,
-        }
+pub unsafe extern "C" fn new_ffi(
+    obj: *mut c_void,
+    start         : unsafe extern "C" fn (*mut c_void) -> usize,
+    get_neightbors: unsafe extern "C" fn (*mut c_void, *mut usize, *mut f64) -> bool,
+    heuristic     : unsafe extern "C" fn (*mut c_void, usize) -> f64,
+    is_end        : unsafe extern "C" fn (*mut c_void, usize) -> bool,
+    reset         : unsafe extern "C" fn (*mut c_void),
+) -> FFI{ 
+    FFI {
+        obj,
+        start, get_neightbors, heuristic,
+        is_end,
+        reset,
     }
 }
 
@@ -54,9 +55,10 @@ impl World<usize> for FFI {
         unsafe{
             let mut val : usize = 0;
             let mut dist: f64 = 0.;
-            while (self.get_neightbors)(self.obj, &mut val, &mut dist) {
+            while (self.get_neightbors)(self.obj, n, &mut dist) {
                 v.push(crate::Neightbor { distance: dist, ident: val});
             }
+            (self.reset)(self.obj);
         }
 
         return v;
@@ -70,7 +72,7 @@ pub struct FFI_AStart (
 );
 
 
-pub extern "C" fn new(world: FFI) -> FFI_AStart{
+pub extern "C" fn new_world(world: FFI) -> FFI_AStart{
     let s = FFI_AStart( AStart::new(world), Vec::new(), 0);
     return s;
 }
