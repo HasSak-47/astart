@@ -1,3 +1,4 @@
+mod ffi;
 use std::{fmt::Debug, marker::PhantomData};
 
 pub trait NodeIdentifier where
