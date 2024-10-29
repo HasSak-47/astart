@@ -1,3 +1,4 @@
+/*
 use std::{any::Any, ffi::c_void};
 
 use crate::{AStart, NodeIdentifier, World};
@@ -95,3 +96,4 @@ pub extern "C" fn next(start : *mut FFI_AStart, val: *mut usize) -> bool {
 
     return true;
 }
+*/

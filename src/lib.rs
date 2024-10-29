@@ -62,13 +62,19 @@ where
     fn __start(&mut self) -> Option<Box<Node<N>>>{
         let start = self.world.get_start();
         let mut candidates = vec![Node::new(start)];
+        let mut explored = vec![];
 
         loop{
             let last = candidates.pop().unwrap();
             if self.world.is_end(last.ident.clone()){
                 return Some(Box::new(last));
             }
-            let mut ns : Vec<_> = self.world
+            println!("last:{:?}", last.ident);
+            println!("candidates: {candidates:?}");
+            println!("explored: {explored:?}");
+            let mut s = String::new();
+            std::io::stdin().read_line(&mut s);
+            let ns : Vec<_> = self.world
                 .get_neightbors(last.ident.clone())
                 .into_iter()
                 .map(|n|{
@@ -82,19 +88,28 @@ where
                 }).collect();
             // candidates.append(&mut ns);
             for ns in ns{
+                println!("child: {:?}", ns.ident);
+                if explored.iter().find(|n| **n == ns.ident).is_some() {
+                    println!("skiped");
+                    continue;
+                }
                 if let Some(repetition) = candidates.iter_mut() .find(|node| ns.ident == node.ident){
-                    if repetition.distance  < ns.distance{
-                        *repetition = ns;
+                    if repetition.score < ns.score{
+                        continue;
+                    }
+                    else{
+                        *repetition = ns.clone();
                     }
                 }
                 else{
-                    candidates.push(ns);
+                    candidates.push(ns.clone());
                 }
             }
             candidates.sort_by(|a, b| b.score.total_cmp(&a.score));
             if candidates.len() == 0{
                 return None;
             }
+            explored.push(last.ident);
         }
     }
 
@@ -113,3 +128,6 @@ where
             .collect();
     }
 }
+
+impl NodeIdentifier for usize {}
+
