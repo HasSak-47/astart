@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use a_start::{AStart, Neightbor, NodeIdentifier, World};
+use a_start::{AStart, Neightbor, World};
 use anyhow::Result;
 
 #[derive(Default, Clone, PartialEq, Eq)]
