@@ -78,5 +78,4 @@ fn rand_world() {
     let a = astart.start();
     let d = dijsktra.start();
     assert_eq!(a, d, "heuristic 0 == to some heuristic");
-
 }

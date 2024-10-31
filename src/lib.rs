@@ -60,6 +60,7 @@ where
         let mut explored = vec![];
 
         loop{
+            println!("candidates: {candidates:?}");
             let last = candidates.pop().unwrap();
             if self.world.is_end(last.ident.clone()){
                 return Some(Box::new(last));
