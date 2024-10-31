@@ -2,10 +2,11 @@ use a_start::{AStart, NodeIdentifier, World};
 use rand::random;
 
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 struct RandomWorld{
     nodes: Vec<(f64, f64)>,
     connections: Vec<(usize, usize)>,
+    heuristic: bool,
 }
 
 impl RandomWorld{
@@ -38,6 +39,9 @@ impl World<usize> for RandomWorld{
     }
 
     fn heuristic(&self, n: usize) -> f64 {
+        if !self.heuristic{
+            return 0.;
+        }
         let dx = self.nodes[n].0 - self.nodes[9].0;
         let dy = self.nodes[n].1 - self.nodes[9].1;
         return (dx * dx + dy * dy).sqrt();
@@ -63,11 +67,16 @@ impl World<usize> for RandomWorld{
 }
 
 
-fn main() {
+#[test]
+fn rand_world() {
     let w = RandomWorld::new();
-    println!("{w:#.3?}");
-    let mut a = AStart::new(w);
-    let r = a.start();
-    println!("{r:?}")
+    let wstart = w.clone();
+    let mut dstart = w;
+    dstart.heuristic = false;
+    let mut astart   = AStart::new(wstart);
+    let mut dijsktra = AStart::new(dstart);
+    let a = astart.start();
+    let d = dijsktra.start();
+    assert_eq!(a, d, "heuristic 0 == to some heuristic");
 
 }
