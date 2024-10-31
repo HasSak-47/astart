@@ -69,11 +69,6 @@ where
             if self.world.is_end(last.ident.clone()){
                 return Some(Box::new(last));
             }
-            println!("last:{:?}", last.ident);
-            println!("candidates: {candidates:?}");
-            println!("explored: {explored:?}");
-            let mut s = String::new();
-            std::io::stdin().read_line(&mut s);
             let ns : Vec<_> = self.world
                 .get_neightbors(last.ident.clone())
                 .into_iter()
@@ -88,9 +83,7 @@ where
                 }).collect();
             // candidates.append(&mut ns);
             for ns in ns{
-                println!("child: {:?}", ns.ident);
                 if explored.iter().find(|n| **n == ns.ident).is_some() {
-                    println!("skiped");
                     continue;
                 }
                 if let Some(repetition) = candidates.iter_mut() .find(|node| ns.ident == node.ident){
