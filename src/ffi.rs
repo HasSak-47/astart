@@ -1,35 +1,22 @@
-/*
 use std::{any::Any, ffi::c_void};
 
-use crate::{AStart, NodeIdentifier, World};
+use crate::{AStart, World};
+
+type Start         = unsafe extern "C" fn (*mut c_void) -> usize;
+type GetNeightbors = unsafe extern "C" fn (*mut c_void, usize, *mut f64) -> bool;
+type Heuristic     = unsafe extern "C" fn (*mut c_void, usize) -> f64;
+type IsEnd         = unsafe extern "C" fn (*mut c_void, usize) -> bool;
+type Reset         = unsafe extern "C" fn (*mut c_void);
 
 #[derive(Debug)]
 #[repr(C)]
 pub struct FFI{
     obj           : *mut c_void,
-    start         : unsafe extern "C" fn (*mut c_void) -> usize,
-    get_neightbors: unsafe extern "C" fn (*mut c_void, usize, *mut f64) -> bool,
-    heuristic     : unsafe extern "C" fn (*mut c_void, usize) -> f64,
-    is_end        : unsafe extern "C" fn (*mut c_void, usize) -> bool,
-    reset         : unsafe extern "C" fn (*mut c_void),
-}
-
-impl NodeIdentifier for usize { }
-
-pub unsafe extern "C" fn new_ffi(
-    obj: *mut c_void,
-    start         : unsafe extern "C" fn (*mut c_void) -> usize,
-    get_neightbors: unsafe extern "C" fn (*mut c_void, *mut usize, *mut f64) -> bool,
-    heuristic     : unsafe extern "C" fn (*mut c_void, usize) -> f64,
-    is_end        : unsafe extern "C" fn (*mut c_void, usize) -> bool,
-    reset         : unsafe extern "C" fn (*mut c_void),
-) -> FFI{ 
-    FFI {
-        obj,
-        start, get_neightbors, heuristic,
-        is_end,
-        reset,
-    }
+    start         : Start,
+    get_neightbors: GetNeightbors,
+    heuristic     : Heuristic,
+    is_end        : IsEnd,
+    reset         : Reset,
 }
 
 impl World<usize> for FFI {
@@ -65,35 +52,65 @@ impl World<usize> for FFI {
         return v;
     }
 }
+
 #[repr(C)]
-pub struct FFI_AStart (
-    AStart<usize, FFI>,
-    Vec<usize>,
-    usize,
-);
-
-
-pub extern "C" fn new_world(world: FFI) -> FFI_AStart{
-    let s = FFI_AStart( AStart::new(world), Vec::new(), 0);
-    return s;
+pub struct FFAStart {
+    astart: AStart<usize, FFI>,
+    result: Vec<usize>,
+    index : usize,
 }
 
-pub extern "C" fn start(start : *mut FFI_AStart) {
-    unsafe{
-        (*start).1 = (*start).0.start();
+
+#[no_mangle]
+pub unsafe extern "C" fn new_ffi(
+    obj           : *mut c_void,
+    start         : Start,
+    get_neightbors: GetNeightbors,
+    heuristic     : Heuristic,
+    is_end        : IsEnd,
+    reset         : Reset,
+) -> FFI {
+    FFI {
+        obj,
+        start,
+        get_neightbors,
+        heuristic,
+        is_end,
+        reset,
     }
 }
 
-pub extern "C" fn next(start : *mut FFI_AStart, val: *mut usize) -> bool {
+#[no_mangle]
+pub unsafe extern "C" fn new_world(world: FFI) -> FFAStart{
+    let s = FFAStart{
+        astart: AStart::new(world),
+        result: Vec::new(),
+        index : 0
+    };
+    return s;
+}
+#[no_mangle]
+pub unsafe extern "C" fn start(start : *mut FFAStart) {
     unsafe{
-        if (*start).2 == (*start).1.len(){
+        (*start).result = (*start).astart.start();
+    }
+}
+#[no_mangle]
+pub unsafe extern "C" fn next(start : *mut FFAStart, val: *mut usize) -> bool {
+    unsafe{
+        if (*start).index == (*start).result.len(){
             return false;
         }
 
-        *val = (*start).1[(*start).2];
-        (*start).2 += 1;
+        *val = (*start).result[(*start).index];
+        (*start).index += 1;
     }
 
     return true;
 }
-*/
+#[no_mangle]
+pub unsafe extern "C" fn reset(start : *mut FFAStart, val: *mut usize) {
+    unsafe{
+        (*start).index = 0;
+    }
+}

@@ -1,0 +1,6 @@
+-Iinclude
+-Iimgui
+-Wal
+-Wextra
+-std=c++17
+

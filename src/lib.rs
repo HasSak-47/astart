@@ -1,23 +1,19 @@
-mod ffi;
+pub mod ffi;
 use std::{fmt::Debug, marker::PhantomData};
 
-pub trait NodeIdentifier where
-    Self: Sized + Clone + PartialEq{}
-
-
 #[derive(Debug)]
-pub struct Neightbor<N: NodeIdentifier>{
+pub struct Neightbor<N>{
     pub distance: f64,
     pub ident: N
 }
 
-impl<N: NodeIdentifier> Neightbor<N>{
+impl<N> Neightbor<N>{
     pub const fn new(ident: N) -> Self{
         Self{ident, distance: 1.}
     }
 }
 
-pub trait World<N: NodeIdentifier>{
+pub trait World<N>{
     fn get_start(&self) -> N;
     fn is_end(&self, n: N) -> bool;
     fn get_neightbors(&mut self, n: N) -> Vec<Neightbor<N>>;
@@ -26,7 +22,6 @@ pub trait World<N: NodeIdentifier>{
 
 pub struct AStart<N, W>
 where
-    N: NodeIdentifier,
     W: World<N>
 {
     world: W,
@@ -34,7 +29,7 @@ where
 }
 
 #[derive(Debug, Clone)]
-struct Node<N: NodeIdentifier + Clone>{
+struct Node<N: Clone>{
     distance: f64, // g
     heuristic: f64, // h
     score: f64, // f
@@ -42,7 +37,7 @@ struct Node<N: NodeIdentifier + Clone>{
     parent: Option<Box<Node<N>>>,
 }
 
-impl<N: NodeIdentifier + Clone> Node<N>{
+impl<N: Clone> Node<N>{
     fn new(ident: N) -> Self{
         Self { score: 0., distance: 0., heuristic: 0., ident, parent: None }
     }
@@ -51,8 +46,8 @@ impl<N: NodeIdentifier + Clone> Node<N>{
 
 impl<N,  W> AStart<N, W>
 where
-    N: NodeIdentifier + Debug,
-    W: World<N> + Debug,
+    N: Clone + PartialEq,
+    W: World<N>,
 {
     pub fn new(world: W) -> Self{
         let s = Self{ world, n: PhantomData };
@@ -81,7 +76,6 @@ where
                     n.score = n.distance + n.heuristic;
                     return n
                 }).collect();
-            // candidates.append(&mut ns);
             for ns in ns{
                 if explored.iter().find(|n| **n == ns.ident).is_some() {
                     continue;
@@ -121,6 +115,3 @@ where
             .collect();
     }
 }
-
-impl NodeIdentifier for usize {}
-
