@@ -19,6 +19,9 @@ build: imgui $(OBJS)
 		$(OBJ_DIR)/imgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_glfw.o $(OBJ_DIR)/liba_start.so \
 		-lGL -llua -lglfw -o $(OUT)
 
+debug:
+	gdb ./$(OUT) --directory=src
+
 run : build
 	@./$(OUT)
 
