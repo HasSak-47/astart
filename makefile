@@ -9,13 +9,15 @@ IMGUI_SRC := $(wildcard imgui/*.cpp)
 IMGUI_OBJS := $(patsubst imgui/%.cpp,$(OBJ_DIR)/%.o,$(IMGUI_SRC))
 
 CXX := g++
-CXXFLAGS := -Iinclude -Iimgui -Wall -Wextra -std=c++17
+CXXFLAGS := -g -O0 -Iinclude -Iimgui -Wall -Wextra -std=c++17
 
 build: imgui $(OBJS) 
 	cargo build --release
 	cp target/release/liba_start.so $(OBJ_DIR)/
 	@echo building final executable
-	$(CXX) $(CXXFLAGS) $(OBJS) $(IMGUI_OBJS) $(OBJ_DIR)/imgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_glfw.o $(OBJ_DIR)/liba_start.so -lGL -lglfw -o $(OUT)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(IMGUI_OBJS) \
+		$(OBJ_DIR)/imgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_glfw.o $(OBJ_DIR)/liba_start.so \
+		-lGL -llua -lglfw -o $(OUT)
 
 run : build
 	@./$(OUT)
@@ -40,6 +42,6 @@ $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
 clean:
-	rm $(OBJ_DIR)/*
+	rm $(OBJS)
 
 .PHONY: build run test clean imgui
