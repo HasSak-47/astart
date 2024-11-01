@@ -84,16 +84,11 @@ int main(int argc, char** argv) {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     std::vector<std::string> v = {};
-    auto dir = std::filesystem::path("./windows/");
+    auto dir = std::filesystem::path("windows/");
     for(auto& entry: std::filesystem::directory_iterator(dir)){
-        std::string code = {};
-        std::ifstream file(entry.path());
-        while(!file.eof()){
-            char b;
-            file.read(&b, 1);
-            code += b;
-        }
-        v.push_back(code);
+        std::string path = entry.path().c_str();
+        std::cout << "entry:" << path << std::endl;
+        v.push_back(path);
     }
 
     LuaHandler handler(v);

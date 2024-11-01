@@ -4,7 +4,7 @@
 
 void LuaWindow::create(){
     std::cout << "creating window with code:" << std::endl;
-    std::cout << this->code;
+    std::cout << this->code << std::endl;;
 
     if (luaL_dofile(this->state, "./scripts/example_1_run_script.lua") == LUA_OK) {
         std::cout << "[C] Executed example_1_run_script.lua\n";
