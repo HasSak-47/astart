@@ -1,3 +1,4 @@
+
 // Dear ImGui: standalone example application for GLFW + OpenGL 3, using programmable pipeline
 // (GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
 
@@ -19,6 +20,7 @@
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
 #include <lua_imgui.hpp>
+#include <thread>
 
 static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -84,11 +86,16 @@ int main(int argc, char** argv) {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     std::vector<std::string> v = {};
-    auto dir = std::filesystem::path("windows/");
+    auto dir = std::filesystem::path("./windows/");
     for(auto& entry: std::filesystem::directory_iterator(dir)){
-        std::string path = entry.path().c_str();
-        std::cout << "entry:" << path << std::endl;
-        v.push_back(path);
+        std::string code = {};
+        std::ifstream file(entry.path());
+        while(!file.eof()){
+            char b;
+            file.read(&b, 1);
+            code += b;
+        }
+        v.push_back(code);
     }
 
     LuaHandler handler(v);
@@ -120,6 +127,8 @@ int main(int argc, char** argv) {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
+        // using namespace std::chrono_literals;
+        // std::this_thread::sleep_for(10s);
     }
 
     // Cleanup
