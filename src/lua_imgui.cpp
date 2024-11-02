@@ -1,3 +1,4 @@
+#include "imgui.h"
 #include <lua_imgui.hpp>
 #include <iostream>
 #include <ostream>
@@ -14,8 +15,12 @@ DragInt::DragInt(const char* label){
 }
 
 
-bool DragInt::render() {
+void DragInt::render() {
     return ImGui::DragInt(this->label.c_str(), &this->data);
+}
+
+void Button::render(){
+    return ImGui::Button(this->label.c_str());
 }
 
 void LuaWindow::render(){

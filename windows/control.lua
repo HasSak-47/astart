@@ -1,6 +1,7 @@
 
 local drag_int = 0
 local last_value = 0
+
 function Setup ()
     if DragInt == nil then
         print('what')

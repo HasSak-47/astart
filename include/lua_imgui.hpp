@@ -12,7 +12,7 @@
 class Widgets {
 public:
     virtual ~Widgets() {}
-    virtual bool render() = 0;
+    virtual void render() = 0;
 };
 
 class DragInt : public Widgets{
@@ -23,7 +23,16 @@ public:
     int data = 0;
     std::string label = "label";
 
-    bool render() override;
+    void render() override;
+};
+
+class Button: public Widgets {
+public:
+    Button();
+    ~Button(){}
+
+    std::string label = "label";
+    void render() override;
 };
 
 struct LuaWindow;
