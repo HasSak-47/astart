@@ -12,4 +12,4 @@ anyhow = "1.0.91"
 rand = "0.8.5"
 
 [lib]
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["cdylib", "staticlib", "rlib"]
