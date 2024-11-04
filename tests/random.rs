@@ -1,7 +1,6 @@
 use a_start::{AStart, World};
 use rand::random;
 
-
 #[derive(Debug, Default, Clone)]
 struct RandomWorld{
     nodes: Vec<(f64, f64)>,

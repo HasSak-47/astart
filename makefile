@@ -11,11 +11,13 @@ IMGUI_OBJS := $(patsubst imgui/%.cpp,$(OBJ_DIR)/%.o,$(IMGUI_SRC))
 CXX := g++
 CXXFLAGS := -Iinclude -Iimgui -Wall -Wextra -std=c++17
 
-build: imgui $(OBJS) 
+rust:
 	cargo build --release
-	cp target/release/liba_start.so $(OBJ_DIR)/
+	cp target/release/liba_start.a $(OBJ_DIR)/
+
+build: rust imgui $(OBJS) 
 	@echo building final executable
-	$(CXX) $(CXXFLAGS) $(OBJS) $(IMGUI_OBJS) $(OBJ_DIR)/imgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_glfw.o $(OBJ_DIR)/liba_start.so -lGL -lglfw -o $(OUT)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(IMGUI_OBJS) $(OBJ_DIR)/imgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_glfw.o $(OBJ_DIR)/liba_start.a -lGL -lglfw -o $(OUT)
 
 run : build
 	@./$(OUT)
@@ -42,4 +44,4 @@ $(OBJ_DIR):
 clean:
 	rm $(OBJ_DIR)/*
 
-.PHONY: build run test clean imgui
+.PHONY: build run test clean imgui rust

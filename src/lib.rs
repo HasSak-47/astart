@@ -22,14 +22,17 @@ pub trait World<N>{
 
 pub struct AStart<N, W>
 where
+    N: Clone,
     W: World<N>
 {
-    world: W,
     n: PhantomData<N>,
+    candidates : Vec<Node<N>>,
+    pub world: W,
+    pub explored : Vec<N>,
 }
 
 #[derive(Debug, Clone)]
-struct Node<N: Clone>{
+pub struct Node<N: Clone>{
     distance: f64, // g
     heuristic: f64, // h
     score: f64, // f
@@ -43,6 +46,12 @@ impl<N: Clone> Node<N>{
     }
 }
 
+pub enum Step<N> where
+    N: Clone,
+{
+    End(Option<Box<Node<N>>>),
+    Continue
+}
 
 impl<N,  W> AStart<N, W>
 where
@@ -50,68 +59,75 @@ where
     W: World<N>,
 {
     pub fn new(world: W) -> Self{
-        let s = Self{ world, n: PhantomData };
+        let mut s = Self{
+            world,
+            n: PhantomData,
+            candidates: Vec::new(),
+            explored: Vec::new(),
+
+        };
+        s.candidates.push( Node::new(s.world.get_start()) );
+
         return s;
     }
 
-    fn __start(&mut self) -> Option<Box<Node<N>>>{
-        let start = self.world.get_start();
-        let mut candidates = vec![Node::new(start)];
-        let mut explored = vec![];
 
-        loop{
-            let last = candidates.pop().unwrap();
-            if self.world.is_end(last.ident.clone()){
-                return Some(Box::new(last));
+    pub fn step(&mut self) -> Step<N>{
+        let last = self.candidates.pop().unwrap();
+        if self.world.is_end(last.ident.clone()){
+            return Step::End(Some(Box::new(last)));
+        }
+        let ns : Vec<_> = self.world
+            .get_neightbors(last.ident.clone())
+            .into_iter()
+            .map(|n|{
+                let dist = n.distance;
+                let mut n = Node::new(n.ident);
+                n.distance = dist + last.distance;
+                n.parent = Some(Box::new(last.clone()));
+                n.heuristic = self.world.heuristic(n.ident.clone());
+                n.score = n.distance + n.heuristic;
+                return n
+            }).collect();
+        for ns in ns{
+            if self.explored.iter().find(|n| **n == ns.ident).is_some() {
+                continue;
             }
-            let ns : Vec<_> = self.world
-                .get_neightbors(last.ident.clone())
-                .into_iter()
-                .map(|n|{
-                    let dist = n.distance;
-                    let mut n = Node::new(n.ident);
-                    n.distance = dist + last.distance;
-                    n.parent = Some(Box::new(last.clone()));
-                    n.heuristic = self.world.heuristic(n.ident.clone());
-                    n.score = n.distance + n.heuristic;
-                    return n
-                }).collect();
-            for ns in ns{
-                if explored.iter().find(|n| **n == ns.ident).is_some() {
+            if let Some(repetition) = self.candidates.iter_mut() .find(|node| ns.ident == node.ident){
+                if repetition.score < ns.score{
                     continue;
                 }
-                if let Some(repetition) = candidates.iter_mut() .find(|node| ns.ident == node.ident){
-                    if repetition.score < ns.score{
-                        continue;
-                    }
-                    else{
-                        *repetition = ns.clone();
-                    }
-                }
                 else{
-                    candidates.push(ns.clone());
+                    *repetition = ns.clone();
                 }
             }
-            candidates.sort_by(|a, b| b.score.total_cmp(&a.score));
-            if candidates.len() == 0{
-                return None;
+            else{
+                self.candidates.push(ns.clone());
             }
-            explored.push(last.ident);
         }
+        self.candidates.sort_by(|a, b| b.score.total_cmp(&a.score));
+        if self.candidates.len() == 0{
+            return Step::End(None);
+        }
+        self.explored.push(last.ident);
+        return Step::Continue;
     }
 
     pub fn start(&mut self) -> Vec<N>{
-        let mut last = self.__start();
-        let mut v = Vec::new();
-
-        while last.is_some(){
-            let data = last.unwrap();
-            v.push(data.ident);
-            last = data.parent;
+        loop{
+            if let Step::End(mut last) = self.step(){
+                let mut v = Vec::new();
+                while last.is_some(){
+                    let data = last.unwrap();
+                    v.push(data.ident);
+                    last = data.parent;
+                }
+                return v
+                    .into_iter()
+                    .rev()
+                    .collect();
+            }
         }
-        return v
-            .into_iter()
-            .rev()
-            .collect();
+
     }
 }

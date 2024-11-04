@@ -1,6 +1,6 @@
 use std::{any::Any, ffi::c_void};
 
-use crate::{AStart, World};
+use crate::{AStart, Node, World};
 
 type Start         = unsafe extern "C" fn (*mut c_void) -> usize;
 type GetNeightbors = unsafe extern "C" fn (*mut c_void, usize, *mut f64) -> bool;
@@ -108,8 +108,37 @@ pub unsafe extern "C" fn next(start : *mut FFAStart, val: *mut usize) -> bool {
 
     return true;
 }
+
 #[no_mangle]
-pub unsafe extern "C" fn reset(start : *mut FFAStart, val: *mut usize) {
+pub unsafe extern "C" fn step(start : *mut FFAStart) {
+    unsafe{
+        (*start).astart.step();
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn explored_ptr(start : *mut FFAStart) -> *const usize{
+    unsafe{
+        (*start).astart.explored.as_ptr()
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn explored_len(start : *mut FFAStart) -> usize{
+    unsafe{
+        (*start).astart.explored.len()
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn candidate(start : *mut FFAStart) -> usize{
+    unsafe{
+        (*start).astart.candidates.last().unwrap_unchecked().ident
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn reset(start : *mut FFAStart) {
     unsafe{
         (*start).index = 0;
     }
