@@ -17,9 +17,6 @@ rust:
 
 build: rust imgui $(OBJS) 
 	@echo building final executable
-<<<<<<< HEAD
-	$(CXX) $(CXXFLAGS) $(OBJS) $(IMGUI_OBJS) $(OBJ_DIR)/imgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_glfw.o $(OBJ_DIR)/liba_start.a -lGL -lglfw -o $(OUT)
-=======
 	$(CXX) $(CXXFLAGS) $(OBJS) $(IMGUI_OBJS) \
 		$(OBJ_DIR)/imgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_glfw.o $(OBJ_DIR)/liba_start.so \
 		-lGL -llua -lglfw \
@@ -27,7 +24,6 @@ build: rust imgui $(OBJS)
 
 debug:
 	gdb ./$(OUT)
->>>>>>> 003312d81cc08e9374c81f0a317adea583b919d3
 
 run : build
 	@./$(OUT)
