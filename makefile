@@ -9,7 +9,7 @@ IMGUI_SRC := $(wildcard imgui/*.cpp)
 IMGUI_OBJS := $(patsubst imgui/%.cpp,$(OBJ_DIR)/%.o,$(IMGUI_SRC))
 
 CXX := g++
-CXXFLAGS := -Iinclude -Iimgui -Wall -Wextra -std=c++17
+CXXFLAGS := -g -O0 -Iinclude -Iimgui -Wall -Wextra -std=c++17
 
 rust:
 	cargo build --release
@@ -17,7 +17,17 @@ rust:
 
 build: rust imgui $(OBJS) 
 	@echo building final executable
+<<<<<<< HEAD
 	$(CXX) $(CXXFLAGS) $(OBJS) $(IMGUI_OBJS) $(OBJ_DIR)/imgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_glfw.o $(OBJ_DIR)/liba_start.a -lGL -lglfw -o $(OUT)
+=======
+	$(CXX) $(CXXFLAGS) $(OBJS) $(IMGUI_OBJS) \
+		$(OBJ_DIR)/imgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_glfw.o $(OBJ_DIR)/liba_start.so \
+		-lGL -llua -lglfw \
+		-o $(OUT)
+
+debug:
+	gdb ./$(OUT)
+>>>>>>> 003312d81cc08e9374c81f0a317adea583b919d3
 
 run : build
 	@./$(OUT)
@@ -42,6 +52,6 @@ $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
 clean:
-	rm $(OBJ_DIR)/*
+	rm $(OBJS)
 
 .PHONY: build run test clean imgui rust
