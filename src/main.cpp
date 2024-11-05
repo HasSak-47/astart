@@ -8,6 +8,7 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
+#include "lua_widgets.hpp"
 #include <filesystem>
 #include <fstream>
 #include <imgui.h>
@@ -116,6 +117,10 @@ int main(int argc, char** argv) {
         ImGui_ImplGlfw_NewFrame();
 
         handler.run();
+        if(ReloadButton::reload){
+            std::cout << "reload" << std::endl;
+            handler.reload();
+        }
 
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
