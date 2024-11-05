@@ -1,16 +1,18 @@
 
 local drag_int = 0
+local button = 0
 local last_value = 0
 
 function Setup ()
-    if DragInt == nil then
+    if DragInt == nil or ReloadButton == nil then
         print('what')
         return
     end
+
     print('set up start:')
-    drag_int = DragInt.new("test0")
+    button = ReloadButton.new()
+    drag_int = DragInt.new("Test 0")
     last_value = DragInt.get(drag_int);
-    print('last_value: ', last_value)
     print('set up end')
 end
 
